@@ -7,27 +7,27 @@ import {LibTime} from "src/lib/LibTime.sol";
 import {FutureTimestamp} from "src/err/ErrTime.sol";
 
 contract LibTimeTest is Test {
-    function externalAgeAt(uint256 timestamp, uint256 currentTimestamp) external pure returns (uint256) {
-        return LibTime.ageAt(timestamp, currentTimestamp);
+    function externalAgeAt(uint256 timestamp, uint256 referenceTimestamp) external pure returns (uint256) {
+        return LibTime.ageAt(timestamp, referenceTimestamp);
     }
 
     function externalAge(uint256 timestamp) external view returns (uint256) {
         return LibTime.age(timestamp);
     }
 
-    function testAgeAtPast(uint256 currentTimestamp, uint256 elapsed) external pure {
-        elapsed = bound(elapsed, 0, currentTimestamp);
-        assertEq(LibTime.ageAt(currentTimestamp - elapsed, currentTimestamp), elapsed);
+    function testAgeAtPast(uint256 referenceTimestamp, uint256 elapsed) external pure {
+        elapsed = bound(elapsed, 0, referenceTimestamp);
+        assertEq(LibTime.ageAt(referenceTimestamp - elapsed, referenceTimestamp), elapsed);
     }
 
-    function testAgeAtSameTime(uint256 currentTimestamp) external pure {
-        assertEq(LibTime.ageAt(currentTimestamp, currentTimestamp), 0);
+    function testAgeAtSameTime(uint256 referenceTimestamp) external pure {
+        assertEq(LibTime.ageAt(referenceTimestamp, referenceTimestamp), 0);
     }
 
-    function testAgeAtFutureReverts(uint256 timestamp, uint256 currentTimestamp) external {
-        vm.assume(timestamp > currentTimestamp);
-        vm.expectRevert(abi.encodeWithSelector(FutureTimestamp.selector, timestamp, currentTimestamp));
-        this.externalAgeAt(timestamp, currentTimestamp);
+    function testAgeAtFutureReverts(uint256 timestamp, uint256 referenceTimestamp) external {
+        vm.assume(timestamp > referenceTimestamp);
+        vm.expectRevert(abi.encodeWithSelector(FutureTimestamp.selector, timestamp, referenceTimestamp));
+        this.externalAgeAt(timestamp, referenceTimestamp);
     }
 
     function testAgeAtFixedExamples() external pure {
@@ -37,22 +37,22 @@ contract LibTimeTest is Test {
         assertEq(LibTime.ageAt(1700000000, 1700003600), 3600);
     }
 
-    function testAgeIsAgeAtBlockTimestamp(uint256 currentTimestamp, uint256 timestamp) external {
-        vm.warp(currentTimestamp);
-        if (timestamp > currentTimestamp) {
-            vm.expectRevert(abi.encodeWithSelector(FutureTimestamp.selector, timestamp, currentTimestamp));
+    function testAgeIsAgeAtBlockTimestamp(uint256 referenceTimestamp, uint256 timestamp) external {
+        vm.warp(referenceTimestamp);
+        if (timestamp > referenceTimestamp) {
+            vm.expectRevert(abi.encodeWithSelector(FutureTimestamp.selector, timestamp, referenceTimestamp));
             this.externalAge(timestamp);
         } else {
-            assertEq(this.externalAge(timestamp), currentTimestamp - timestamp);
+            assertEq(this.externalAge(timestamp), referenceTimestamp - timestamp);
         }
     }
 
     /// A max age so large that `timestamp + maxAge` overflows never makes the
     /// timestamp stale.
-    function testMaxAgeOverflowNotStale(uint256 currentTimestamp, uint256 timestamp, uint256 maxAge) external pure {
-        vm.assume(currentTimestamp > 0);
-        timestamp = bound(timestamp, 1, currentTimestamp);
+    function testMaxAgeOverflowNotStale(uint256 referenceTimestamp, uint256 timestamp, uint256 maxAge) external pure {
+        vm.assume(referenceTimestamp > 0);
+        timestamp = bound(timestamp, 1, referenceTimestamp);
         maxAge = bound(maxAge, type(uint256).max - timestamp + 1, type(uint256).max);
-        assertFalse(LibTime.ageAt(timestamp, currentTimestamp) > maxAge);
+        assertFalse(LibTime.ageAt(timestamp, referenceTimestamp) > maxAge);
     }
 }
