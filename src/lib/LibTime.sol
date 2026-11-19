@@ -14,6 +14,7 @@ library LibTime {
     /// @return The age, `now_ - timestamp`. Reverts `FutureTimestamp` if
     /// `timestamp > now_`.
     function ageAt(uint256 timestamp, uint256 now_) internal pure returns (uint256) {
+        //slither-disable-next-line timestamp
         if (timestamp > now_) {
             revert FutureTimestamp(timestamp, now_);
         }
