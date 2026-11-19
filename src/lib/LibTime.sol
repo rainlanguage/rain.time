@@ -8,19 +8,19 @@ import {FutureTimestamp} from "../err/ErrTime.sol";
 /// @notice Ages of timestamps. A staleness check is `age(timestamp) > maxAge`,
 /// which cannot overflow for any `maxAge`, unlike `timestamp + maxAge`.
 library LibTime {
-    /// Seconds from `timestamp` to `now_`.
+    /// Seconds from `timestamp` to `currentTimestamp`.
     /// @param timestamp The timestamp to age.
-    /// @param now_ The time to measure against.
-    /// @return The age, `now_ - timestamp`. Reverts `FutureTimestamp` if
-    /// `timestamp > now_`.
-    function ageAt(uint256 timestamp, uint256 now_) internal pure returns (uint256) {
+    /// @param currentTimestamp The time to measure against.
+    /// @return The age, `currentTimestamp - timestamp`. Reverts `FutureTimestamp` if
+    /// `timestamp > currentTimestamp`.
+    function ageAt(uint256 timestamp, uint256 currentTimestamp) internal pure returns (uint256) {
         //slither-disable-next-line timestamp
-        if (timestamp > now_) {
-            revert FutureTimestamp(timestamp, now_);
+        if (timestamp > currentTimestamp) {
+            revert FutureTimestamp(timestamp, currentTimestamp);
         }
-        // timestamp <= now_.
+        // timestamp <= currentTimestamp.
         unchecked {
-            return now_ - timestamp;
+            return currentTimestamp - timestamp;
         }
     }
 
