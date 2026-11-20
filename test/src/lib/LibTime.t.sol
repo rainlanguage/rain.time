@@ -118,4 +118,18 @@ contract LibTimeTest is Test {
             );
         }
     }
+
+    function testAgeFixedExamples() external {
+        vm.warp(1700003600);
+        assertEq(LibTime.age(1700000000), 3600);
+        assertEq(LibTime.age(1700003600), 0);
+    }
+
+    function testIsStaleFixedExamples() external {
+        vm.warp(1700003600);
+        assertTrue(LibTime.isStale(1700000000, 3600));
+        assertFalse(LibTime.isStale(1700000000, 3601));
+        assertFalse(LibTime.isStale(1700000001, 3600));
+        assertTrue(LibTime.isStale(0, type(uint256).max));
+    }
 }
