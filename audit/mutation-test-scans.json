@@ -16,5 +16,23 @@
       "testsAfter": 6,
       "filed": []
     }
+  },
+  {
+    "timestamp": "2026-11-20T13:46:56Z",
+    "commit": "4dd8c6bb003409416ce8ef0f42f5ccc1f2232c3a",
+    "testsAfterCommit": "4dd8c6bb003409416ce8ef0f42f5ccc1f2232c3a",
+    "publishedTag": null,
+    "commitsAheadOfTag": 0,
+    "scope": "LibTime.isStaleAt / LibTime.isStale (src/lib/LibTime.sol)",
+    "tool": "adversarial-mutation-test",
+    "skillVersion": "0.35.0",
+    "summary": {
+      "behaviours": 8,
+      "candidates": 0,
+      "confirmed": 0,
+      "testsBefore": 6,
+      "testsAfter": 12,
+      "filed": []
+    }
   }
 ]
