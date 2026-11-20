@@ -1,0 +1,20 @@
+[
+  {
+    "timestamp": "2026-11-20T13:21:04Z",
+    "commit": "275b33827733ab59b1133d0e37c613ea1fa13414",
+    "testsAfterCommit": "275b33827733ab59b1133d0e37c613ea1fa13414",
+    "publishedTag": null,
+    "commitsAheadOfTag": 0,
+    "scope": "whole repo (src/lib/LibTime.sol)",
+    "tool": "adversarial-mutation-test",
+    "skillVersion": "0.35.0",
+    "summary": {
+      "behaviours": 8,
+      "candidates": 0,
+      "confirmed": 0,
+      "testsBefore": 0,
+      "testsAfter": 6,
+      "filed": []
+    }
+  }
+]
