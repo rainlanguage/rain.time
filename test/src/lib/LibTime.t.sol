@@ -55,4 +55,81 @@ contract LibTimeTest is Test {
         maxAge = bound(maxAge, type(uint256).max - timestamp + 1, type(uint256).max);
         assertFalse(LibTime.ageAt(timestamp, referenceTimestamp) > maxAge);
     }
+
+    function externalIsStaleAt(uint256 timestamp, uint256 maxAge, uint256 referenceTimestamp)
+        external
+        pure
+        returns (bool)
+    {
+        return LibTime.isStaleAt(timestamp, maxAge, referenceTimestamp);
+    }
+
+    function externalIsStale(uint256 timestamp, uint256 maxAge) external view returns (bool) {
+        return LibTime.isStale(timestamp, maxAge);
+    }
+
+    function testIsStaleAtPast(uint256 timestamp, uint256 maxAge, uint256 referenceTimestamp) external pure {
+        vm.assume(referenceTimestamp > 0);
+        timestamp = bound(timestamp, 1, referenceTimestamp);
+        assertEq(LibTime.isStaleAt(timestamp, maxAge, referenceTimestamp), referenceTimestamp - timestamp >= maxAge);
+    }
+
+    function testIsStaleAtZeroTimestamp(uint256 maxAge, uint256 referenceTimestamp) external pure {
+        assertTrue(LibTime.isStaleAt(0, maxAge, referenceTimestamp));
+    }
+
+    function testIsStaleAtFutureReverts(uint256 timestamp, uint256 maxAge, uint256 referenceTimestamp) external {
+        vm.assume(timestamp > referenceTimestamp);
+        vm.expectRevert(abi.encodeWithSelector(FutureTimestamp.selector, timestamp, referenceTimestamp));
+        this.externalIsStaleAt(timestamp, maxAge, referenceTimestamp);
+    }
+
+    function testIsStaleAtFixedExamples() external pure {
+        // Edge instant: age == maxAge is stale.
+        assertTrue(LibTime.isStaleAt(1700000000, 3600, 1700003600));
+        assertFalse(LibTime.isStaleAt(1700000000, 3600, 1700003599));
+        assertTrue(LibTime.isStaleAt(1700000000, 3600, 1700003601));
+        // maxAge 0: even age 0 is stale.
+        assertTrue(LibTime.isStaleAt(1700000000, 0, 1700000000));
+        // maxAge 1: only age 0 is fresh.
+        assertFalse(LibTime.isStaleAt(1700000000, 1, 1700000000));
+        // Zero timestamp is stale even when its age is below maxAge.
+        assertTrue(LibTime.isStaleAt(0, type(uint256).max, 0));
+        assertTrue(LibTime.isStaleAt(0, type(uint256).max, 1));
+    }
+
+    /// `timestamp + maxAge` overflows; a non-zero past timestamp is fresh.
+    function testIsStaleAtMaxAgeOverflow(uint256 timestamp, uint256 referenceTimestamp) external pure {
+        vm.assume(referenceTimestamp > 0);
+        timestamp = bound(timestamp, 1, referenceTimestamp);
+        assertFalse(LibTime.isStaleAt(timestamp, type(uint256).max, referenceTimestamp));
+    }
+
+    function testIsStaleIsIsStaleAtBlockTimestamp(uint256 timestamp, uint256 maxAge, uint256 referenceTimestamp)
+        external
+    {
+        vm.warp(referenceTimestamp);
+        if (timestamp > referenceTimestamp) {
+            vm.expectRevert(abi.encodeWithSelector(FutureTimestamp.selector, timestamp, referenceTimestamp));
+            this.externalIsStale(timestamp, maxAge);
+        } else {
+            assertEq(
+                this.externalIsStale(timestamp, maxAge), timestamp == 0 || referenceTimestamp - timestamp >= maxAge
+            );
+        }
+    }
+
+    function testAgeFixedExamples() external {
+        vm.warp(1700003600);
+        assertEq(LibTime.age(1700000000), 3600);
+        assertEq(LibTime.age(1700003600), 0);
+    }
+
+    function testIsStaleFixedExamples() external {
+        vm.warp(1700003600);
+        assertTrue(LibTime.isStale(1700000000, 3600));
+        assertFalse(LibTime.isStale(1700000000, 3601));
+        assertFalse(LibTime.isStale(1700000001, 3600));
+        assertTrue(LibTime.isStale(0, type(uint256).max));
+    }
 }
