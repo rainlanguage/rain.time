@@ -40,6 +40,7 @@ library LibTime {
     /// @return True if stale. Reverts `FutureTimestamp` if
     /// `timestamp > referenceTimestamp`.
     function isStaleAt(uint256 timestamp, uint256 maxAge, uint256 referenceTimestamp) internal pure returns (bool) {
+        //slither-disable-next-line timestamp
         return timestamp == 0 || ageAt(timestamp, referenceTimestamp) >= maxAge;
     }
 
